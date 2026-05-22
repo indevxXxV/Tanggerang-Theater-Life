@@ -1,1 +1,51 @@
-tes
+new WIB_OFFSET = 7;
+
+stock LoadWIBOffset()
+{
+    new File:f = fopen("wib_offset.cfg", io_read);
+    if(!f)
+    {
+        
+        SaveWIBOffset(7);
+        printf("[WIBSync] Pertama kali jalan, default UTC+7 (WIB Jakarta).");
+        return;
+    }
+    new buf[8];
+    fread(f, buf, sizeof(buf));
+    fclose(f);
+    WIB_OFFSET = strval(buf);
+    printf("[WIBSync] Offset loaded dari file: +%d jam", WIB_OFFSET);
+
+    
+    new _h, _m, _s;
+    gettime(_h, _m, _s);
+    WorldTime = (_h + WIB_OFFSET) % 24;
+    SetWorldTime(WorldTime);
+}
+
+stock SaveWIBOffset(offset)
+{
+    new File:f = fopen("wib_offset.cfg", io_write);
+    if(!f)
+    {
+        printf("[WIBSync] ERROR: Gagal tulis wib_offset.cfg!");
+        return;
+    }
+    new buf[8];
+    format(buf, sizeof(buf), "%d", offset);
+    fwrite(f, buf);
+    fclose(f);
+    WIB_OFFSET = offset;
+
+    
+    new _h, _m, _s;
+    gettime(_h, _m, _s);
+    WorldTime = (_h + WIB_OFFSET) % 24;
+    SetWorldTime(WorldTime);
+    printf("[WIBSync] Offset disimpan: +%d jam, WorldTime = %d", offset, WorldTime);
+}
+
+
+jangan lupa panggil Di OnGamemodeInit 
+LoadWIBOffset();
+	SetWeather(WorldWeather);
